@@ -1,0 +1,33 @@
+type: action
+definition:
+  title: Get context attributes
+  description: >-
+    Retrieve all of the available attributes for a specific type of context
+    table.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/getcontext-managementv1attributescontexttype
+  namespace: tools.exabeam
+  name: get_context_attributes
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    contextType:
+      type: str
+      description: >-
+        Specify the type of context table for which you want to retrieve the
+        available attributes. Allowed values: Other, User, TI_ips, TI_domains.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: get_context_attributes
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/context-management/v1/attributes/${{ FN.url_encode(inputs.contextType) }}
+        method: GET
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+  returns: ${{ steps.get_context_attributes.result }}

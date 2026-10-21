@@ -1,0 +1,36 @@
+type: action
+definition:
+  title: Delete context records
+  description: >-
+    Delete one or more context records directly from an existing custom context
+    table by including them in the request body.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/deletecontext-managementv1tablesiddeleterecords
+  namespace: tools.exabeam
+  name: delete_context_records
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    id:
+      type: str
+      description: Specify the ID of an existing context table.
+    ids:
+      type: list[str]
+      description: A list of primary key values for the records to be deleted.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: delete_context_records
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/context-management/v1/tables/${{ FN.url_encode(inputs.id) }}/deleteRecords
+        method: DELETE
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload:
+          ids: ${{ inputs.ids }}
+  returns: ${{ steps.delete_context_records.result }}

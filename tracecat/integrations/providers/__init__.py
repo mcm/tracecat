@@ -5,6 +5,7 @@ from tracecat.integrations.providers.databricks import (
     DatabricksACProvider,
     DatabricksCCProvider,
 )
+from tracecat.integrations.providers.exabeam.oauth import ExabeamOAuthProvider
 from tracecat.integrations.providers.github.app import (
     GitHubAppInstallationProvider,
     GitHubAppUserProvider,
@@ -103,6 +104,7 @@ _PROVIDER_CLASSES: list[type[BaseOAuthProvider]] = [
     GoogleSheetsCCProvider,
     GoogleSlidesACProvider,
     GoogleSlidesCCProvider,
+    ExabeamOAuthProvider,
     JamfOAuthProvider,
     PaloAltoSCMOAuthProvider,
     ProofpointThreatProtectionOAuthProvider,

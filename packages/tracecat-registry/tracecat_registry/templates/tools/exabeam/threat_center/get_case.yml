@@ -1,0 +1,30 @@
+type: action
+definition:
+  title: Get case
+  description: >-
+    Get details for a specific case, as identified by a case ID.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/threat-center-get-case-by-id
+  namespace: tools.exabeam
+  name: get_case
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    caseId:
+      type: str
+      description: Unique ID that identifies a case.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: get_case
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/threat-center/v1/cases/${{ FN.url_encode(inputs.caseId) }}
+        method: GET
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+  returns: ${{ steps.get_case.result }}

@@ -1,0 +1,35 @@
+type: action
+definition:
+  title: Get MITRE techniques
+  description: >-
+    Get entire MITRE ATT&CK techniques and related sub-techniques.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/get-mitre-techniques-with-subtechniques
+  namespace: tools.exabeam
+  name: get_mitre_techniques
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    nameContains:
+      type: str | None
+      description: >-
+        MITRE technique ID (for example T1124) or MITRE technique name (for
+        example Video Capture). Maximum 32 characters.
+      default: null
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: get_mitre_techniques
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/mitre/v1/techniques
+        method: GET
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        params:
+          nameContains: ${{ inputs.nameContains }}
+  returns: ${{ steps.get_mitre_techniques.result }}

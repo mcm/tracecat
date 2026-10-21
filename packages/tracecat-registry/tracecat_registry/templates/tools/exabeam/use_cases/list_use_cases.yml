@@ -1,0 +1,38 @@
+type: action
+definition:
+  title: List use cases
+  description: >-
+    Search for use cases by name. For each use case that matches the name,
+    returns a description of the use case, supported scenarios, and the use
+    case category.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/use-case-get-all
+  namespace: tools.exabeam
+  name: list_use_cases
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    nameContains:
+      type: str | None
+      description: >-
+        Use case name. Enter a full name or partial name to match one or more
+        use cases, or leave blank to retrieve information for all use cases.
+        Maximum 32 characters.
+      default: null
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: list_use_cases
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/use-cases/v1/cases
+        method: GET
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        params:
+          nameContains: ${{ inputs.nameContains }}
+  returns: ${{ steps.list_use_cases.result }}

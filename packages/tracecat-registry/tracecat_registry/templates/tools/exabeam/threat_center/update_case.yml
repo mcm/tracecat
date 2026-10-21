@@ -1,0 +1,43 @@
+type: action
+definition:
+  title: Update case
+  description: >-
+    Update details for a specific case, as identified by case ID. Only the
+    fields present in `payload` are sent.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/threat-center-update-case-by-id-v2
+  namespace: tools.exabeam
+  name: update_case
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    caseId:
+      type: str
+      description: Unique ID that identifies a case.
+    payload:
+      # Generic: this is a partial update whose optional fields are not
+      # documented as nullable, and a literal payload map cannot omit an unset
+      # optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: alertDescription (plaintext
+        or HTML), alertName, priority (CRITICAL, HIGH, MEDIUM, LOW), tags
+        (list of strings), stage, closedReason (Already Mitigated or Resolved,
+        False Positive or Duplicate, Low Risk, Rule Misconfiguration, Policy or
+        Setup Issue, Other), supportingReason, assignee, queue.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: update_case
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/threat-center/v2/cases/${{ FN.url_encode(inputs.caseId) }}
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.update_case.result }}

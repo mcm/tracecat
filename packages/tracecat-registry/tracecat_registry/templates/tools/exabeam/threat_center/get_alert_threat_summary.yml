@@ -1,0 +1,49 @@
+type: action
+definition:
+  title: Get alert threat summary
+  description: >-
+    Retrieve the Copilot Threat Summary for an individual alert. The
+    AI-generated summary is based on the threat intelligence data for the alert
+    and provides threat insights and any recommended next steps.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/threat-center-get-threat-explanation
+  namespace: tools.exabeam
+  name: get_alert_threat_summary
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    alertCreationTimestamp:
+      type: str | None
+      description: >-
+        The alert creation timestamp in ISO-8601 format. Providing this
+        parameter improves API performance by limiting the search scope. If not
+        provided, all records will be scanned.
+      default: null
+    payload:
+      # Generic: the optional prompt field is not documented as nullable, and a
+      # literal payload map cannot omit an unset optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: alertId (required; unique
+        ID that identifies an alert), prompt (relevant data or details about
+        the threat to add context to the AI-generated summary; can be phrased
+        as a question, e.g. "When is the rule triggered", to focus the
+        summary).
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: get_alert_threat_summary
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/threat-center/v1/alerts/threat-explainer/prompt
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        params:
+          alertCreationTimestamp: ${{ inputs.alertCreationTimestamp }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.get_alert_threat_summary.result }}

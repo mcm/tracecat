@@ -1,0 +1,32 @@
+type: action
+definition:
+  title: Delete correlation rules
+  description: >-
+    Delete a list of correlation rules.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/correlation-delete-rule-list
+  namespace: tools.exabeam
+  name: delete_correlation_rules
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    ruleIds:
+      type: list[str]
+      description: List of correlation rule identifiers.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: delete_correlation_rules
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/correlation-rules/v2/rules/delete
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload:
+          ruleIds: ${{ inputs.ruleIds }}
+  returns: ${{ steps.delete_correlation_rules.result }}

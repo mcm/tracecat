@@ -1,0 +1,39 @@
+type: action
+definition:
+  title: Create case
+  description: >-
+    Create a new case associated with an alert and set case details like
+    `stage`, `priority`, `queue`, `assignee`, and `closedReason`.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/threat-center-create-case-v2
+  namespace: tools.exabeam
+  name: create_case
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    payload:
+      # Generic: the body's optional fields are not documented as nullable, and
+      # a literal payload map cannot omit an unset optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: alertId (required; alert
+        UUID), priority (required; CRITICAL, HIGH, MEDIUM, LOW), assignee,
+        stage, queue, closedReason (Already Mitigated or Resolved, False
+        Positive or Duplicate, Low Risk, Rule Misconfiguration, Policy or Setup
+        Issue, Other), supportingReason.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: create_case
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/threat-center/v2/cases
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.create_case.result }}

@@ -1,0 +1,38 @@
+type: action
+definition:
+  title: Delete context table
+  description: >-
+    Delete a specific context table, including records and attributes.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/deletecontext-managementv1tablesid
+  namespace: tools.exabeam
+  name: delete_context_table
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    id:
+      type: str
+      description: Specify the ID of an existing context table.
+    deleteUnusedCustomAttributes:
+      type: bool | None
+      description: >-
+        Delete any custom attributes in this table that are not used in another
+        context table. Defaults to false.
+      default: null
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: delete_context_table
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/context-management/v1/tables/${{ FN.url_encode(inputs.id) }}
+        method: DELETE
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        params:
+          deleteUnusedCustomAttributes: ${{ inputs.deleteUnusedCustomAttributes }}
+  returns: ${{ steps.delete_context_table.result }}

@@ -1,0 +1,42 @@
+type: action
+definition:
+  title: Search cases
+  description: >-
+    Search for cases that match one or more search criteria. Returns one
+    request's results, capped by `limit`.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/threat-center-search-cases
+  namespace: tools.exabeam
+  name: search_cases
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    payload:
+      # Generic: the body has optional fields (limit, orderBy) that are not
+      # documented as nullable, and a literal payload map cannot omit an unset
+      # optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: filter (required; filter
+        for specific results), fields (required; list of fields to be returned
+        from the search, use `*` to return all applicable fields), startTime
+        (required; timestamp to start the search, ISO-8601), endTime (required;
+        timestamp to end the search, ISO-8601), limit (integer; limit the
+        number of results returned, default 3000), orderBy (list of strings;
+        order results by a specified field in ASC or DESC order).
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: search_cases
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/threat-center/v1/search/cases
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.search_cases.result }}

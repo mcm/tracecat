@@ -1,0 +1,42 @@
+type: action
+definition:
+  title: Update alert
+  description: >-
+    Update details for a specific alert, as identified by an alert ID. Only the
+    fields present in `payload` are sent.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/threat-center-update-alert-by-id
+  namespace: tools.exabeam
+  name: update_alert
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    alertId:
+      type: str
+      description: Unique ID that identifies an alert.
+    payload:
+      # Generic: this is a partial update whose optional fields are not
+      # documented as nullable, and a literal payload map cannot omit an unset
+      # optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: alertDescription (plaintext
+        or HTML; HTML formatting is reflected in the Threat Center web
+        interface), alertName, priority (CRITICAL, HIGH, MEDIUM, LOW), tags
+        (list of strings used to group alerts), alertStatus (READ, UNREAD).
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: update_alert
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/threat-center/v1/alerts/${{ FN.url_encode(inputs.alertId) }}
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.update_alert.result }}

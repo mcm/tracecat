@@ -1,0 +1,61 @@
+type: action
+definition:
+  title: Add context records from CSV
+  description: >-
+    Add context records to an existing table using a CSV file. The CSV file
+    must contain a header row with column names for the attributes you want to
+    map. File size can be a maximum of 300 MB or 500,000 records; larger files
+    must be compressed as a ZIP file containing only one CSV file. Use the
+    value of `operation` to `append` the added data or `replace` the existing
+    data.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/postcontext-managementv1tablesidaddrecordsfromcsv
+  namespace: tools.exabeam
+  name: add_context_records_from_csv
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    id:
+      type: str
+      description: Specify the ID of an existing context table.
+    base64_content:
+      type: str
+      description: >-
+        Base64-encoded CSV (or ZIP) file that contains the new records, sent as
+        the multipart `file` field.
+    filename:
+      type: str
+      description: Filename sent to Exabeam.
+    form_data:
+      # Generic: the multipart form has optional fields (sourceAttributes,
+      # targetAttributeIds) that are not documented as nullable, and a literal
+      # form_data map cannot omit an unset optional.
+      type: dict[str, Any]
+      description: >-
+        API-native multipart form fields (other than `file`). Documented fields:
+        operation (required; how to handle the records from the CSV file:
+        `append` adds new records to the existing records, `replace` replaces
+        the existing records), sourceAttributes (list of strings; source
+        attributes that match the column names, as defined in the header row of
+        the CSV file), targetAttributeIds (list of strings; target attributes
+        that will be mapped to the source attributes).
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: add_context_records_from_csv
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/context-management/v1/tables/${{ FN.url_encode(inputs.id) }}/addRecordsFromCsv
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        form_data: ${{ inputs.form_data }}
+        files:
+          file:
+            filename: ${{ inputs.filename }}
+            content_base64: ${{ inputs.base64_content }}
+  returns: ${{ steps.add_context_records_from_csv.result }}

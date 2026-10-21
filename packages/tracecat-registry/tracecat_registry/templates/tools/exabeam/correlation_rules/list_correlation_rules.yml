@@ -1,0 +1,34 @@
+type: action
+definition:
+  title: List correlation rules
+  description: >-
+    Returns a list of all correlation rules that match the name.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/correlation-get-all-rules
+  namespace: tools.exabeam
+  name: list_correlation_rules
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    nameContains:
+      type: str | None
+      description: >-
+        Rule name. Maximum 128 characters.
+      default: null
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: list_correlation_rules
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/correlation-rules/v2/rules
+        method: GET
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        params:
+          nameContains: ${{ inputs.nameContains }}
+  returns: ${{ steps.list_correlation_rules.result }}

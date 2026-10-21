@@ -1,0 +1,41 @@
+type: action
+definition:
+  title: Import analytics rules
+  description: >-
+    Import a list of rule definitions to create or update rules. A file can
+    contain a maximum of 50 custom rules and must not exceed 4 MB in size.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/detection-management-import-rules
+  namespace: tools.exabeam
+  name: import_analytics_rules
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    base64_content:
+      type: str
+      description: >-
+        Base64-encoded file that contains the list of rule definitions to
+        import, following the import/export file format. Sent as the multipart
+        `file` field.
+    filename:
+      type: str
+      description: Filename sent to Exabeam.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: import_analytics_rules
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/detection-management/v1/analytics-rules/import
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        files:
+          file:
+            filename: ${{ inputs.filename }}
+            content_base64: ${{ inputs.base64_content }}
+  returns: ${{ steps.import_analytics_rules.result }}

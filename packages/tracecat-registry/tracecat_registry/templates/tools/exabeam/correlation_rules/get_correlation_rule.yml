@@ -1,0 +1,30 @@
+type: action
+definition:
+  title: Get correlation rule
+  description: >-
+    Return the details of a specific correlation rule.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/correlation-get-rule-by-id
+  namespace: tools.exabeam
+  name: get_correlation_rule
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    ruleId:
+      type: str
+      description: Correlation rule ID.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: get_correlation_rule
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/correlation-rules/v2/rules/${{ FN.url_encode(inputs.ruleId) }}
+        method: GET
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+  returns: ${{ steps.get_correlation_rule.result }}

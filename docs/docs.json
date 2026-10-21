@@ -242,6 +242,7 @@
               "tools/elasticsearch",
               "tools/emailrep",
               "tools/exa",
+              "tools/exabeam",
               "tools/falconpy",
               "tools/first_epss",
               "tools/fleetdm",

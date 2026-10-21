@@ -1,0 +1,38 @@
+type: action
+definition:
+  title: Set correlation rules state
+  description: >-
+    Set the state of a correlation rule list.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/correlation-set-rule-state-list
+  namespace: tools.exabeam
+  name: set_correlation_rules_state
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    ruleIds:
+      type: list[str]
+      description: List of correlation rule identifiers.
+    enable:
+      type: bool
+      description: >-
+        Specifies the enable status of the rule. Set this field to `true` to
+        enable the rules. Set it to `false` to disable the rules.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: set_correlation_rules_state
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/correlation-rules/v2/rules/setrulesstate
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload:
+          ruleIds: ${{ inputs.ruleIds }}
+          enable: ${{ inputs.enable }}
+  returns: ${{ steps.set_correlation_rules_state.result }}

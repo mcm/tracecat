@@ -1,0 +1,33 @@
+type: action
+definition:
+  title: Export correlation rules
+  description: >-
+    Export a list of correlation rules definitions. A maximum of 50 rules can be
+    exported at a time.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/correlation-export-rules
+  namespace: tools.exabeam
+  name: export_correlation_rules
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    ruleIds:
+      type: list[str]
+      description: A list of rule IDs to export. Maximum 50.
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: export_correlation_rules
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/correlation-rules/v2/rules/export
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload:
+          ruleIds: ${{ inputs.ruleIds }}
+  returns: ${{ steps.export_correlation_rules.result }}

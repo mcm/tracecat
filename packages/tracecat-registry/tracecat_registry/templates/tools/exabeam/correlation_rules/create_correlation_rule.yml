@@ -1,0 +1,43 @@
+type: action
+definition:
+  title: Create correlation rule
+  description: >-
+    Create a new correlation rule.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/correlation-create-rule
+  namespace: tools.exabeam
+  name: create_correlation_rule
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    payload:
+      # Generic: the body's optional fields are not documented as nullable,
+      # and a literal payload map cannot omit an unset optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: name (required), description,
+        severity (required; none, low, medium, high, critical), enabled (rule
+        status, default false), testMode (enable rule test mode, default false),
+        sequencesConfig (required; rule sequences properties: sequences
+        (required), commonProperties, outcomes), suppressConfig (enable
+        suppression of repeating rule triggers: suppressOption, suppressTime,
+        suppressUnit (minutes, hours, days, weeks), granularSuppressOption,
+        suppressGroupFields), delayConfig (enable rule evaluation delay; default
+        delay is 7 minutes if delay is not enabled: delay, delayTimeInMinutes),
+        scheduleConfig (scheduled recurrences: recurrences (required)).
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: create_correlation_rule
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/correlation-rules/v2/rules
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.create_correlation_rule.result }}

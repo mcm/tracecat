@@ -636,6 +636,7 @@ export const UDFIcons: Record<string, (props: CustomIconProps) => JSX.Element> =
     "tools.elasticsearch": createCatalogIconRenderer("elastic_mcp"),
     "tools.greynoise": createCatalogIconRenderer("greynoise_mcp"),
     "tools.iru": createCatalogIconRenderer("iru_mcp"),
+    "tools.exabeam": createIconRenderer(ExabeamIcon),
     "tools.jamf": createCatalogIconRenderer("jamf_mcp"),
     "tools.panther": createCatalogIconRenderer("panther_mcp"),
     "tools.rootly": createCatalogIconRenderer("rootly_mcp"),
@@ -963,6 +964,11 @@ export const providerIcons: Record<
   github_app: ({ className, ...rest }) => (
     <div className={className}>
       <GitHubIcon {...rest} />
+    </div>
+  ),
+  exabeam: ({ className, ...rest }) => (
+    <div className={className}>
+      <ExabeamIcon {...rest} />
     </div>
   ),
   servicenow: ({ className, ...rest }) => (
@@ -1689,6 +1695,27 @@ export function JiraIcon({ className, ...rest }: IconProps) {
           <stop offset="1" stopColor="#2684FF" />
         </linearGradient>
       </defs>
+    </svg>
+  )
+}
+
+export function ExabeamIcon({ className, ...rest }: IconProps) {
+  return (
+    <svg
+      viewBox="0 -7.645 66.63 66.63"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...rest}
+    >
+      <path
+        d="M21.74,44.53L45.63,11.59l4.2,5.79-19.69,27.15h-8.4ZM8.4,51.34L41.42,5.79l-4.2-5.79L0,51.34h8.4Z"
+        fill="#009D00"
+      />
+      <path
+        d="M63.75,44.53l2.88-3.98-4.2-5.79-7.08,9.77h8.4ZM42.01,51.34l16.22-22.37-4.2-5.79-20.42,28.17h8.4Z"
+        fill="#006BFF"
+      />
     </svg>
   )
 }

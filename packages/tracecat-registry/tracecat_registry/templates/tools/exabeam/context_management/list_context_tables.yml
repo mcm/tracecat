@@ -1,0 +1,28 @@
+type: action
+definition:
+  title: List context tables
+  description: >-
+    Retrieve metadata for all existing context tables, including source,
+    operational status, and attribute mapping.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/getcontext-managementv1tables
+  namespace: tools.exabeam
+  name: list_context_tables
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: list_context_tables
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/context-management/v1/tables
+        method: GET
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+  returns: ${{ steps.list_context_tables.result }}

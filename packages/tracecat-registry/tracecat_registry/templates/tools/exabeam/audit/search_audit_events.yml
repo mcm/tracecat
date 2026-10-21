@@ -1,0 +1,42 @@
+type: action
+definition:
+  title: Search audit events
+  description: >-
+    Perform search queries across multiple years' worth of audit events.
+    Returns up to `limit` events in one response.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/audit-get-events
+  namespace: tools.exabeam
+  name: search_audit_events
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    payload:
+      # Generic: the body's optional fields are not documented as nullable,
+      # and a literal payload map cannot omit an unset optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: fields (required; list of
+        fields to be returned from the audit search), startTime (required; ISO
+        8601 UTC timestamp to start the audit search), endTime (required; ISO
+        8601 UTC timestamp to end the audit search), filter (filter for
+        specific audit events), limit (limit the number of events returned,
+        default 3000), groupBy (list of fields to GROUP BY), orderBy (order
+        fields by ASC or DESC), distinct (include or exclude DISTINCT from the
+        SELECT clause, default false).
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: search_audit_events
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/audit/v1/events
+        method: POST
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.search_audit_events.result }}

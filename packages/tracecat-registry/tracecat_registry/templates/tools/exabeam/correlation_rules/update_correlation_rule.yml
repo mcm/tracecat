@@ -1,0 +1,46 @@
+type: action
+definition:
+  title: Update correlation rule
+  description: >-
+    Update a correlation rule.
+  display_group: Exabeam
+  doc_url: https://developers.exabeam.com/exabeam/reference/correlation-update-rule
+  namespace: tools.exabeam
+  name: update_correlation_rule
+  secrets:
+    - type: oauth
+      provider_id: exabeam
+      grant_type: client_credentials
+  expects:
+    ruleId:
+      type: str
+      description: Correlation rule ID.
+    payload:
+      # Generic: the body's optional fields are not documented as nullable,
+      # and a literal payload map cannot omit an unset optional.
+      type: dict[str, Any]
+      description: >-
+        API-native request body. Documented fields: name (required), description,
+        severity (required; none, low, medium, high, critical), enabled (rule
+        status, default false), testMode (enable rule test mode, default false),
+        sequencesConfig (required; rule sequences properties: sequences
+        (required), commonProperties, outcomes), suppressConfig (enable
+        suppression of repeating rule triggers: suppressOption, suppressTime,
+        suppressUnit (minutes, hours, days, weeks), granularSuppressOption,
+        suppressGroupFields), delayConfig (enable rule evaluation delay; default
+        delay is 7 minutes if delay is not enabled: delay, delayTimeInMinutes),
+        scheduleConfig (scheduled recurrences: recurrences (required)).
+    base_url:
+      type: str | None
+      description: Exabeam API base URL (e.g. https://api.us-west.exabeam.cloud).
+      default: null
+  steps:
+    - ref: update_correlation_rule
+      action: core.http_request
+      args:
+        url: ${{ inputs.base_url || VARS.exabeam.base_url }}/correlation-rules/v2/rules/${{ FN.url_encode(inputs.ruleId) }}
+        method: PUT
+        headers:
+          Authorization: Bearer ${{ SECRETS.exabeam_oauth.EXABEAM_SERVICE_TOKEN }}
+        payload: ${{ inputs.payload }}
+  returns: ${{ steps.update_correlation_rule.result }}
